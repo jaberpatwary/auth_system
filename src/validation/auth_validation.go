@@ -32,3 +32,8 @@ type ForgotPassword struct {
 type Token struct {
 	Token string `json:"token" validate:"required,max=255"`
 }
+type QueryAuth struct {
+	Page   int    `validate:"omitempty,number,max=50"`
+	Limit  int    `validate:"omitempty,number,max=50"`
+	Search string `validate:"omitempty,max=50"`
+}

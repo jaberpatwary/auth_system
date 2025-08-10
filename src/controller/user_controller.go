@@ -3,6 +3,7 @@ package controller
 import (
 	"app/src/service"
 	"app/src/validation"
+
 	"github.com/google/uuid"
 
 	"github.com/gofiber/fiber/v2"
@@ -50,6 +51,7 @@ func (u *UserController) GetAll(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(users)
 }
 
+// Get By UserId
 func (u *UserController) GetByUserId(c *fiber.Ctx) error {
 
 	UserId := c.Params("userId")

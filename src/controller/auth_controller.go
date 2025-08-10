@@ -2,8 +2,10 @@ package controller
 
 import (
 	"app/src/service"
+	"app/src/validation"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type AuthController struct {
@@ -28,4 +30,42 @@ func (u *AuthController) CreateAuth(c *fiber.Ctx) error {
 		})
 	}
 	return c.Status(fiber.StatusCreated).JSON(auth)
+}
+
+// Get All
+func (u *AuthController) GetAll(c *fiber.Ctx) error {
+	query := &validation.QueryAuth{
+
+		Page:   c.QueryInt("Page", 1),
+		Limit:  c.QueryInt("Limit", 20),
+		Search: c.Query("Search", ""),
+	}
+
+	auth, err := u._AuthService.GetAll(c, query)
+
+	if err != nil {
+
+		return err
+	}
+	return c.Status(fiber.StatusOK).JSON(auth)
+}
+
+// Get By AuthId
+func (u *AuthController) GetByAuthId(c *fiber.Ctx) error {
+
+	AuthId := c.Params("authId")
+
+	if _, err := uuid.Parse(AuthId); err != nil {
+
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid user id")
+	}
+
+	auth, err := u._AuthService.GetByAuthId(c, AuthId)
+
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(auth)
+
 }

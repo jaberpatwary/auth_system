@@ -13,6 +13,6 @@ func AuthRoutes(v1 fiber.Router, u service.AuthService) {
 	// Define user-related routes
 	authGroup := v1.Group("/auths")
 	authGroup.Post("/", authController.CreateAuth)
-	//userGroup.Get("/", userController.GetAll)
-	//userGroup.Get("/:userId", userController.GetByUserId)
+	authGroup.Get("/", authController.GetAll)
+	authGroup.Get("/:authId", authController.GetByAuthId)
 }
