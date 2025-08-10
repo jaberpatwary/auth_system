@@ -10,16 +10,16 @@ import (
 
 func Routes(app *fiber.App, db *gorm.DB) {
 
-
-
 	UserService := service.NewUserService(db)
+
+	AuthService := service.NewAuthService(db)
 
 	v1 := app.Group("/v1")
 
 	//HealthCheckRoutes(v1, healthCheckService)
 
-
 	UserRoutes(v1, UserService)
+	AuthRoutes(v1, AuthService)
 	// TODO: add another routes here...
 
 	if !config.IsProd {

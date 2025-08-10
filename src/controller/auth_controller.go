@@ -1,9 +1,7 @@
-ackage controller
+package controller
 
 import (
 	"app/src/service"
-	"app/src/validation"
-	"github.com/google/uuid"
 
 	"github.com/gofiber/fiber/v2"
 )
