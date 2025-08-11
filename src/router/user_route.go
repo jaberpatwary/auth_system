@@ -15,4 +15,6 @@ func UserRoutes(v1 fiber.Router, u service.UserService) {
 	userGroup.Post("/", userController.CreateUser)
 	userGroup.Get("/", userController.GetAll)
 	userGroup.Get("/:userId", userController.GetByUserId)
+	userGroup.Put("/:userId", userController.UpdateUser)
+	userGroup.Delete("/:userId", userController.DeleteUser)
 }

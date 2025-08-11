@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"app/src/response"
 	"app/src/service"
 	"app/src/validation"
 
@@ -68,5 +69,44 @@ func (u *UserController) GetByUserId(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(user)
+
+}
+
+// Update User
+func (u *UserController) UpdateUser(c *fiber.Ctx) error {
+	req := new(validation.UpdateUser2)
+	userID := c.Params("userId")
+	if _, err := uuid.Parse(userID); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid user ID")
+	}
+
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+	}
+
+	user, err := u._UserService.Update(c, req, userID)
+	if err != nil {
+		return err
+	}
+	return c.Status(fiber.StatusOK).JSON(user)
+}
+
+// deleteUser
+func (u *UserController) DeleteUser(c *fiber.Ctx) error {
+	userID := c.Params("userId")
+
+	if _, err := uuid.Parse(userID); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid user ID")
+	}
+	if err := u._UserService.DeleteUser(c, userID); err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).
+		JSON(response.Common{
+			Code:    fiber.StatusOK,
+			Status:  "success",
+			Message: "Delete user successfully",
+		})
 
 }

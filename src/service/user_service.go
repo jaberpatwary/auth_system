@@ -2,7 +2,9 @@ package service
 
 import (
 	"app/src/model"
+	"app/src/utils"
 	"app/src/validation"
+	"errors"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -12,9 +14,8 @@ type UserService interface {
 	CreateUser(c *fiber.Ctx) (*model.User, error)
 	GetAll(c *fiber.Ctx, params *validation.QueryUser) ([]model.User, error)
 	GetByUserId(c *fiber.Ctx, id string) (*model.User, error)
-	//GetByPhoneNumber(c *fiber.Ctx)
-	//Update(c *fiber.Ctx)
-	//Delete(c *fiber.Ctx)
+	Update(c *fiber.Ctx, req *validation.UpdateUser2, id string) (*model.User, error)
+	DeleteUser(c *fiber.Ctx, id string) error
 }
 
 // Define methods for user service
@@ -79,4 +80,62 @@ func (s *userService) GetByUserId(c *fiber.Ctx, id string) (*model.User, error) 
 		return nil, err
 	}
 	return user, nil
+}
+
+// Update user details
+func (s *userService) Update(c *fiber.Ctx, req *validation.UpdateUser2, id string) (*model.User, error) {
+	if req.PhoneNumber == "" && req.FullName == "" {
+		return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid Request")
+	}
+	if req.Password == "" {
+		hashedPassword, err := utils.HashPassword(req.Password)
+		if err != nil {
+			return nil, err
+		}
+		req.Password = hashedPassword
+	}
+
+	updateBody := &model.User{
+
+		PhoneNumber: req.PhoneNumber,
+		FullName:    req.FullName,
+	}
+	result := s.DB.WithContext(c.Context()).Where("id = ?", id).Updates(updateBody)
+
+	if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
+		return nil, fiber.NewError(fiber.StatusConflict, "Phone number already exists")
+	}
+
+	if result.RowsAffected == 0 {
+		return nil, fiber.NewError(fiber.StatusConflict, "User Not found")
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	user, err := s.GetByUserId(c, id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+
+}
+
+// DeleteUser
+func (s *userService) DeleteUser(c *fiber.Ctx, id string) error {
+	user := new(model.User)
+
+	result := s.DB.WithContext(c.Context()).Delete(user, "id = ?", id)
+
+	if result.RowsAffected == 0 {
+		return fiber.NewError(fiber.StatusNotFound, "User not found")
+	}
+
+	if result.Error != nil {
+
+		//s.Log.Errorf("Failed to delete user: %+v", result.Error)
+	}
+
+	return result.Error
+
 }

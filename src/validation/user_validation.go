@@ -23,3 +23,10 @@ type QueryUser struct {
 	Limit  int    `validate:"omitempty,number,max=50"`
 	Search string `validate:"omitempty,max=50"`
 }
+
+type UpdateUser2 struct {
+	PhoneNumber string `json:"phoneNumber"`
+	FullName    string `json:"fullName"`
+	Password    string `json:"password"`
+	UserType    string `json:"userType"`
+}
