@@ -15,4 +15,5 @@ func AuthRoutes(v1 fiber.Router, u service.AuthService) {
 	authGroup.Post("/", authController.CreateAuth)
 	authGroup.Get("/", authController.GetAll)
 	authGroup.Get("/:authId", authController.GetByAuthId)
+	authGroup.Put("/:authId", authController.UpdateAuth)
 }

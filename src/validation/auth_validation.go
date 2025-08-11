@@ -32,8 +32,16 @@ type ForgotPassword struct {
 type Token struct {
 	Token string `json:"token" validate:"required,max=255"`
 }
+
 type QueryAuth struct {
 	Page   int    `validate:"omitempty,number,max=50"`
 	Limit  int    `validate:"omitempty,number,max=50"`
 	Search string `validate:"omitempty,max=50"`
+}
+type UpdateAuth2 struct {
+	PhoneNumber string `json:"phoneNumber" validate:"omitempty,e164"`
+	FullName    string `json:"fullName" validate:"omitempty,min=2,max=100"`
+	Password    string `json:"password" validate:"omitempty,min=6"`
+	UserAgent   string `json:"userAgent" validate:"omitempty"`
+	IPAddress   string `json:"ipAddress" validate:"omitempty,ip"`
 }

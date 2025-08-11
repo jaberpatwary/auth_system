@@ -69,3 +69,22 @@ func (u *AuthController) GetByAuthId(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(auth)
 
 }
+
+// Update auth details
+func (u *AuthController) UpdateAuth(c *fiber.Ctx) error {
+	req := new(validation.UpdateAuth2)
+	authID := c.Params("authId")
+	if _, err := uuid.Parse(authID); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid auth ID")
+	}
+
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+	}
+
+	auth, err := u._AuthService.Update(c, req, authID)
+	if err != nil {
+		return err
+	}
+	return c.Status(fiber.StatusOK).JSON(auth)
+}
