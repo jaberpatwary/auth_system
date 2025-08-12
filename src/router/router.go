@@ -13,6 +13,7 @@ func Routes(app *fiber.App, db *gorm.DB) {
 	UserService := service.NewUserService(db)
 
 	AuthService := service.NewAuthService(db)
+	OtpService := service.NewOtpService(db)
 
 	v1 := app.Group("/v1")
 
@@ -20,6 +21,7 @@ func Routes(app *fiber.App, db *gorm.DB) {
 
 	UserRoutes(v1, UserService)
 	AuthRoutes(v1, AuthService)
+	OtpRoutes(v1, OtpService)
 	// TODO: add another routes here...
 
 	if !config.IsProd {
