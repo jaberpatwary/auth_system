@@ -10,8 +10,8 @@ import (
 
 type OtpService interface {
 	CreateOtp(c *fiber.Ctx) (*model.OtpToken, error)
-	//GetAll(c *fiber.Ctx, params *validation.QueryAuth) ([]model.AuthToken, error)
-	//GetByAuthId(c *fiber.Ctx, id string) (*model.AuthToken, error)
+	GetAll(c *fiber.Ctx, params *validation.QueryOtp) ([]model.OtpToken, error)
+	GetByOtpId(c *fiber.Ctx, id string) (*model.OtpToken, error)
 	//Update(c *fiber.Ctx, req *validation.UpdateAuth2, id string) (*model.AuthToken, error)
 
 	//Update(c *fiber.Ctx)
@@ -68,4 +68,16 @@ func (s *otpService) GetAll(c *fiber.Ctx, params *validation.QueryOtp) ([]model.
 
 	return otp, result.Error
 
+}
+
+// GetbyId
+
+func (s *otpService) GetByOtpId(c *fiber.Ctx, id string) (*model.OtpToken, error) {
+	otp := new(model.OtpToken)
+
+	result := s.DB.WithContext(c.Context()).First(&otp, "id = ?", id)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+	return otp, nil
 }

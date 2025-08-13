@@ -13,7 +13,7 @@ func OtpRoutes(v1 fiber.Router, u service.OtpService) {
 	// Define user-related routes
 	otpGroup := v1.Group("/otp")
 	otpGroup.Post("/", otpController.CreateOtp)
-	//authGroup.Get("/", authController.GetAll)
-	//authGroup.Get("/:authId", authController.GetByAuthId)
+	otpGroup.Get("/", otpController.GetAll)
+	otpGroup.Get("/:otpId", otpController.GetByOtpId)
 	//authGroup.Put("/:authId", authController.UpdateAuth)
 }
