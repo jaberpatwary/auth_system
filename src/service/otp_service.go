@@ -2,6 +2,7 @@ package service
 
 import (
 	"app/src/model"
+	"app/src/validation"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -40,4 +41,31 @@ func (s *otpService) CreateOtp(c *fiber.Ctx) (*model.OtpToken, error) {
 	}
 
 	return &otp, nil
+}
+
+// Get All
+func (s *otpService) GetAll(c *fiber.Ctx, params *validation.QueryOtp) ([]model.OtpToken, error) {
+
+	var otp []model.OtpToken
+
+	offset := (params.Page - 1) * params.Limit
+
+	query := s.DB.WithContext(c.Context()).Order("created_at asc")
+
+	if search := params.Search; search != "" {
+		query = query.Where("name LIKE? or phoneNumber LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+	result := query.Find(&otp).Offset(offset)
+
+	if err := query.Find(&otp).Error; err != nil {
+		return nil, err
+	}
+	result = query.Limit(params.Limit).Offset(offset).Find(&otp)
+	if result.Error != nil {
+
+		return nil, result.Error
+	}
+
+	return otp, result.Error
+
 }
