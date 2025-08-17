@@ -3,7 +3,6 @@ package service
 import (
 	"app/src/model"
 	"app/src/validation"
-	"errors"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -16,7 +15,7 @@ type OtpService interface {
 	Update(c *fiber.Ctx, req *validation.UpdateOtp, id string) (*model.OtpToken, error)
 
 	//Update(c *fiber.Ctx)
-	//Delete(c *fiber.Ctx)
+	DeleteOtp(c *fiber.Ctx, id string) error
 }
 
 // Define methods for user service
@@ -83,40 +82,64 @@ func (s *otpService) GetByOtpId(c *fiber.Ctx, id string) (*model.OtpToken, error
 	return otp, nil
 }
 
-// Update Otp details
+// Update OTP token details
 func (s *otpService) Update(c *fiber.Ctx, req *validation.UpdateOtp, id string) (*model.OtpToken, error) {
-	if req.OtpCode == "" && req.Purpose == "" {
-		return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid Request")
-	}
-	if req.Purpose == "" {
-		hashedPurpose, err := hashedPurpose(req.Purpose)
-		if err != nil {
-			return nil, err
-		}
-		req.Purpose = hashedPurpose
+	// --- Validate: at least one field must be provided ---
+	if req.OtpCode == "" && req.Purpose == "" && req.IsUsed == nil && req.ExpiresAt == nil {
+		return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid Request: nothing to update")
 	}
 
-	updateBody := &model.OtpToken{
+	// --- Prepare update body ---
+	updateBody := &model.OtpToken{}
 
-		OtpCode: req.OtpCode,
-		Purpose: req.Purpose,
+	if req.OtpCode != "" {
+		updateBody.OtpCode = req.OtpCode
 	}
+	if req.Purpose != "" {
+		updateBody.Purpose = req.Purpose
+	}
+	if req.IsUsed != nil {
+		updateBody.IsUsed = *req.IsUsed
+	}
+	if req.ExpiresAt != nil {
+		updateBody.ExpiresAt = *req.ExpiresAt
+	}
+
+	// --- Update query ---
 	result := s.DB.WithContext(c.Context()).Where("id = ?", id).Updates(updateBody)
 
-	if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
-		return nil, fiber.NewError(fiber.StatusConflict, "Phone number already exists")
-	}
-
-	if result.RowsAffected == 0 {
-		return nil, fiber.NewError(fiber.StatusConflict, "User Not found")
-	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	otp, err := s.GetByOtpId(c, id)
-	if err != nil {
+	if result.RowsAffected == 0 {
+		return nil, fiber.NewError(fiber.StatusNotFound, "OtpToken not found")
+	}
+
+	// --- Fetch updated OTP token ---
+	otp := new(model.OtpToken)
+	if err := s.DB.First(otp, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
+
 	return otp, nil
+}
+
+// delete OTP token
+func (s *otpService) DeleteOtp(c *fiber.Ctx, id string) error {
+	otp := new(model.OtpToken)
+
+	result := s.DB.WithContext(c.Context()).Delete(otp, "id = ?", id)
+
+	if result.RowsAffected == 0 {
+		return fiber.NewError(fiber.StatusNotFound, "otp not found")
+	}
+
+	if result.Error != nil {
+
+		//s.Log.Errorf("Failed to delete user: %+v", result.Error)
+	}
+
+	return result.Error
+
 }

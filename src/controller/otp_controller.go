@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"app/src/response"
 	"app/src/service"
 	"app/src/validation"
 
@@ -68,5 +69,44 @@ func (u *OtpController) GetByOtpId(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(otp)
+
+}
+
+// Update OTP
+func (u *OtpController) UpdateOtp(c *fiber.Ctx) error {
+	req := new(validation.UpdateOtp)
+	otpID := c.Params("otpId")
+	if _, err := uuid.Parse(otpID); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid otp ID")
+	}
+
+	if err := c.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+	}
+
+	otp, err := u._OtpService.Update(c, req, otpID)
+	if err != nil {
+		return err
+	}
+	return c.Status(fiber.StatusOK).JSON(otp)
+}
+
+// Delete OTP
+func (u *OtpController) DeleteOtp(c *fiber.Ctx) error {
+	otpID := c.Params("otpId")
+
+	if _, err := uuid.Parse(otpID); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid otp ID")
+	}
+	if err := u._OtpService.DeleteOtp(c, otpID); err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).
+		JSON(response.Common{
+			Code:    fiber.StatusOK,
+			Status:  "success",
+			Message: "Delete otp successfully",
+		})
 
 }

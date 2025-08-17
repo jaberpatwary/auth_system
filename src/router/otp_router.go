@@ -15,5 +15,6 @@ func OtpRoutes(v1 fiber.Router, u service.OtpService) {
 	otpGroup.Post("/", otpController.CreateOtp)
 	otpGroup.Get("/", otpController.GetAll)
 	otpGroup.Get("/:otpId", otpController.GetByOtpId)
-	//authGroup.Put("/:authId", authController.UpdateAuth)
+	otpGroup.Put("/:otpId", otpController.UpdateOtp)
+	otpGroup.Delete("/:optId", otpController.DeleteOtp)
 }
